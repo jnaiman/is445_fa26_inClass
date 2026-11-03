@@ -75,3 +75,64 @@ with tab1:
     st.altair_chart(chart)
 with tab2:
     st.altair_chart(scatters)
+
+
+st.subheader('Quick Vega-editor copy')
+# from numpy.random import default_rng as rng
+
+# df = pd.DataFrame(rng(0).standard_normal((60, 3)), columns=["a", "b", "c"])
+
+df2 = pd.read_json('https://raw.githubusercontent.com/vega/vega-datasets/refs/heads/master/data/population.json')
+
+df2
+
+# st.vega_lite_chart(
+#     df2,
+#     {
+#         "mark": {"type": "circle", "tooltip": True},
+#         "encoding": {
+#             "x": {"field": "year", "type": "quantitative"},
+#             "y": {"field": "people", "type": "quantitative"},
+#             "size": {"field": "age", "type": "quantitative"},
+#             "color": {"field": "sex", "type": "quantitative"},
+#         },
+#     },
+#     alt="Scatter plot of a vs b sized by c",
+# )
+
+st.vega_lite_chart(df2,
+{
+  #"$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  #"description": "A population pyramid for the US in 2000, created using stack. See https://vega.github.io/vega-lite/examples/concat_population_pyramid.html for a variant of this created using concat.",
+  #"data": { "url": "data/population.json"},
+  "transform": [
+    {"filter": "datum.year == 2000"},
+    {"calculate": "datum.sex == 2 ? 'Female' : 'Male'", "as": "gender"},
+    {"calculate": "datum.sex == 2 ? -datum.people : datum.people", "as": "signed_people"}
+  ],
+  "width": 300,
+  "height": 200,
+  "mark": "bar",
+  "encoding": {
+    "y": {
+      "field": "age",
+      #"axis": null, "sort": "descending"
+    },
+    "x": {
+      "aggregate": "sum", "field": "signed_people",
+      "title": "population",
+      "axis": {"format": "s"}
+    },
+    "color": {
+      "field": "gender",
+      "scale": {"range": ["#675193", "#ca8861"]},
+      #"legend": {"orient": "top", "title": null}
+    }
+  },
+  "config": {
+    # "view": {"stroke": null},
+    # "axis": {"grid": false}
+  }
+}
+)
+
